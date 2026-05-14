@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>FR-DE Quiz Scoreboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="login-page" class="page active">
+    <div class="login-container">
+        <div class="login-flags">
+            <span class="flag-de">🇩🇪</span>
+            <span class="flag-x">×</span>
+            <span class="flag-fr">🇫🇷</span>
+        </div>
+        <h1 class="login-title">Quiz Scoreboard</h1>
+        <p class="login-subtitle">Sprichwörter · Proverbes</p>
+
+        <div id="public-podium" class="podium-section mini-podium">
+            <h2 class="podium-heading">🏆 Top 3</h2>
+            <div class="podium-wrapper" id="public-podium-wrapper">
+                <div class="podium-slot second" id="pub-second">
+                    <div class="podium-avatar">2</div>
+                    <div class="podium-name">—</div>
+                    <div class="podium-score">0</div>
+                    <div class="podium-bar bar-2"></div>
+                </div>
+                <div class="podium-slot first" id="pub-first">
+                    <div class="podium-crown">👑</div>
+                    <div class="podium-avatar">1</div>
+                    <div class="podium-name">—</div>
+                    <div class="podium-score">0</div>
+                    <div class="podium-bar bar-1"></div>
+                </div>
+                <div class="podium-slot third" id="pub-third">
+                    <div class="podium-avatar">3</div>
+                    <div class="podium-name">—</div>
+                    <div class="podium-score">0</div>
+                    <div class="podium-bar bar-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <form id="login-form" class="login-form" autocomplete="off">
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Benutzername" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Passwort" required>
+            </div>
+            <button type="submit" class="btn-login">Anmelden</button>
+            <p id="login-error" class="login-error"></p>
+        </form>
+    </div>
+</div>
+
+<!-- MAIN SCOREBOARD PAGE -->
+<div id="main-page" class="page">
+    <header class="app-header">
+        <div class="header-left">
+            <span class="header-flags">🇩🇪🇫🇷</span>
+            <h1>Scoreboard</h1>
+        </div>
+        <div class="header-right">
+            <button id="btn-add-team" class="btn-icon" title="Team hinzufügen">＋</button>
+            <button id="btn-reset-all" class="btn-icon btn-danger" title="Alles zurücksetzen">🗑</button>
+            <button id="btn-logout" class="btn-icon" title="Abmelden">🚪</button>
+        </div>
+    </header>
+
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="🔍 Team suchen...">
+    </div>
+
+    <!-- ADD TEAM MODAL -->
+    <div id="add-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Neues Team</h2>
+            <input type="text" id="new-team-name" placeholder="Teamname eingeben..." maxlength="40">
+            <div class="modal-actions">
+                <button id="modal-cancel" class="btn-secondary">Abbrechen</button>
+                <button id="modal-confirm" class="btn-primary">Hinzufügen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm modal is created dynamically by app.js -->
+
+    <!-- TOP 3 PODIUM -->
+    <div class="podium-section full-podium">
+        <h2 class="podium-heading">🏆 Podium</h2>
+        <div class="podium-wrapper" id="main-podium-wrapper">
+            <div class="podium-slot second" id="main-second">
+                <div class="podium-avatar">2</div>
+                <div class="podium-name">—</div>
+                <div class="podium-score">0</div>
+                <div class="podium-bar bar-2"></div>
+            </div>
+            <div class="podium-slot first" id="main-first">
+                <div class="podium-crown">👑</div>
+                <div class="podium-avatar">1</div>
+                <div class="podium-name">—</div>
+                <div class="podium-score">0</div>
+                <div class="podium-bar bar-1"></div>
+            </div>
+            <div class="podium-slot third" id="main-third">
+                <div class="podium-avatar">3</div>
+                <div class="podium-name">—</div>
+                <div class="podium-score">0</div>
+                <div class="podium-bar bar-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCOREBOARD TABLE -->
+    <div class="scoreboard-container">
+        <div class="scoreboard-header-row">
+            <span class="col-rank">#</span>
+            <span class="col-team">Team</span>
+            <span class="col-score">Score</span>
+            <span class="col-actions"></span>
+        </div>
+        <div id="scoreboard-list" class="scoreboard-list"></div>
+    </div>
+
+    <div class="footer-spacer"></div>
+</div>
+
+<script src="app.js?v=3"></script>
+</body>
+</html>
