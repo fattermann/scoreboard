@@ -1,23 +1,51 @@
 (function () {
     'use strict';
 
-    // ===== STORAGE =====
-    const STORAGE_KEY = 'frde_quiz_teams';
+    // ===== AUTH =====
     const AUTH_KEY = 'frde_quiz_auth';
     const VALID_USER = 'Frank';
     const VALID_PASS = 'Fiete123';
 
-    function loadTeams() {
-        try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-        catch { return []; }
-    }
-    function saveTeams(teams) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(teams));
-    }
     function isLoggedIn() { return sessionStorage.getItem(AUTH_KEY) === '1'; }
     function setLoggedIn(v) { v ? sessionStorage.setItem(AUTH_KEY, '1') : sessionStorage.removeItem(AUTH_KEY); }
 
-    let teams = loadTeams();
+    let teams = [];
+
+    // ===== API HELPERS =====
+    async function apiGet() {
+        const res = await fetch('/api/teams');
+        teams = await res.json();
+        return teams;
+    }
+    async function apiAddTeam(name) {
+        const res = await fetch('/api/teams', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        });
+        if (res.status === 409) throw new Error('exists');
+        teams = await apiGet();
+        return teams;
+    }
+    async function apiChangeScore(id, delta) {
+        const res = await fetch('/api/teams/' + id, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ delta })
+        });
+        teams = await res.json();
+        return teams;
+    }
+    async function apiDeleteTeam(id) {
+        const res = await fetch('/api/teams/' + id, { method: 'DELETE' });
+        teams = await res.json();
+        return teams;
+    }
+    async function apiDeleteAll() {
+        const res = await fetch('/api/teams', { method: 'DELETE' });
+        teams = await res.json();
+        return teams;
+    }
 
     // ===== DOM REFS =====
     const loginPage = document.getElementById('login-page');
@@ -87,7 +115,8 @@
     }
 
     // ===== INIT =====
-    function init() {
+    async function init() {
+        await apiGet();
         updatePublicPodium();
         if (isLoggedIn()) {
             showPage(mainPage);
@@ -136,24 +165,24 @@
         if (e.key === 'Enter') { e.preventDefault(); addTeam(); }
     });
 
-    function addTeam() {
+    async function addTeam() {
         const name = newTeamNameInput.value.trim();
         if (!name) return;
-        if (teams.some(t => t.name.toLowerCase() === name.toLowerCase())) {
-            showConfirm('Dieses Team existiert bereits!', null);
-            return;
+        try {
+            await apiAddTeam(name);
+            addModal.classList.add('hidden');
+            renderScoreboard();
+        } catch (err) {
+            if (err.message === 'exists') {
+                showConfirm('Dieses Team existiert bereits!', null);
+            }
         }
-        teams.push({ name: name, score: 0, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6) });
-        saveTeams(teams);
-        addModal.classList.add('hidden');
-        renderScoreboard();
     }
 
     // ===== RESET =====
     btnResetAll.addEventListener('click', function () {
-        showConfirm('Alle Teams und Scores wirklich löschen?', function () {
-            teams = [];
-            saveTeams(teams);
+        showConfirm('Alle Teams und Scores wirklich löschen?', async function () {
+            await apiDeleteAll();
             renderScoreboard();
         });
     });
@@ -169,19 +198,15 @@
     });
 
     // ===== SCORE CHANGE =====
-    function changeScore(id, delta) {
-        const team = teams.find(t => t.id === id);
-        if (!team) return;
-        team.score += delta;
-        saveTeams(teams);
+    async function changeScore(id, delta) {
+        await apiChangeScore(id, delta);
         renderScoreboard();
 
-        // Pop animation on score
         setTimeout(() => {
             const el = scoreboardList.querySelector(`[data-id="${id}"] .col-score`);
             if (el) {
                 el.classList.remove('score-pop');
-                void el.offsetWidth; // reflow
+                void el.offsetWidth;
                 el.classList.add('score-pop');
             }
         }, 30);
@@ -191,19 +216,14 @@
     function deleteTeam(id) {
         const team = teams.find(t => t.id === id);
         if (!team) return;
-        showConfirm(`Team "${team.name}" wirklich löschen?`, function () {
-            teams = teams.filter(t => t.id !== id);
-            saveTeams(teams);
+        showConfirm(`Team "${team.name}" wirklich löschen?`, async function () {
+            await apiDeleteTeam(id);
             renderScoreboard();
         });
     }
 
     // ===== RENDER SCOREBOARD =====
     function renderScoreboard() {
-        // Sort by score descending, then alphabetically
-        teams.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
-        saveTeams(teams); // keep sorted order
-
         scoreboardList.innerHTML = '';
 
         if (teams.length === 0) {
@@ -230,7 +250,6 @@
             });
         }
 
-        // Re-apply search filter
         const q = searchInput.value.toLowerCase().trim();
         if (q) {
             scoreboardList.querySelectorAll('.team-row').forEach(row => {

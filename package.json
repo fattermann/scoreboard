@@ -1,0 +1,12 @@
+{
+  "name": "frde-quiz-scoreboard",
+  "version": "1.0.0",
+  "description": "FR-DE Quiz Scoreboard with server-side persistence",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
